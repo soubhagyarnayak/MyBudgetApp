@@ -26,7 +26,16 @@ class MonthlyExpensesActivity : AppCompatActivity() {
             Logger.getLogger("handler").warning("in the handler")
             Logger.getLogger("handler").warning(expenses.count().toString())
             gridViewAdapter = GridViewAdapter(applicationContext,expenses)
-            monthlyExpenseDataGrid.adapter = gridViewAdapter
+            monthlyExpenseTable.invalidate()
+            for (expense in expenses){
+                var inflator = applicationContext!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                var expenseEntryView = inflator.inflate(R.layout.monthly_expense_entry, null)
+                expenseEntryView.amountCellText.text = expense.amount.toString()
+                expenseEntryView.categoryCellText.text = expense.category.toString()
+                expenseEntryView.descriptionCellText.text = expense.description.toString()
+                expenseEntryView.dateTimeCellText.text = expense.createTime.toString()
+                monthlyExpenseTable.addView(expenseEntryView)
+            }
             Logger.getLogger("handler").warning("in the handler2")
         }
 
@@ -44,44 +53,6 @@ class MonthlyExpensesActivity : AppCompatActivity() {
         }
         dbWorkerThread.postTask(readTask)
 
-    }
-
-    class GridViewAdapter : BaseAdapter {
-        var expenses: List<ExpenseEntry> = ArrayList()
-        var context: Context? = null
-
-        constructor(context: Context, monthlyExpenses: List<ExpenseEntry>) : super() {
-            this.context = context
-            this.expenses = monthlyExpenses
-        }
-
-        override fun getCount(): Int {
-            return expenses.size
-        }
-
-        override fun getItem(position: Int): Any {
-            return expenses[position]
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val expense = this.expenses[position]
-
-            var inflator = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            var expenseEntryView = inflator.inflate(R.layout.monthly_expense_entry, null)
-            expenseEntryView.amountCellText.text = expense.amount.toString()
-            expenseEntryView.categoryCellText.text = expense.category.toString()
-            expenseEntryView.descriptionCellText.text = expense.description.toString()
-            expenseEntryView.dateTimeCellText.text = expense.createTime.toString()
-            return expenseEntryView
-        }
-
-        override fun notifyDataSetChanged() {
-            super.notifyDataSetChanged()
-        }
     }
 }
 
