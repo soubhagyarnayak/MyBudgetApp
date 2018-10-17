@@ -7,4 +7,14 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/monthly_expense_details"
+        android:orderInCategory="10"
+        android:title="Monthly Expense"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/expense_details"
+        android:orderInCategory="20"
+        android:title="All Expenses"
+        app:showAsAction="never" />
 </menu>

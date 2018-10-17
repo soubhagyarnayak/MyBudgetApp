@@ -19,6 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MonthlyExpensesActivity"></activity>
     </application>
 
 </manifest>

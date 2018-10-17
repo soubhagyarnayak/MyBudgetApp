@@ -4,7 +4,7 @@ import android.os.Handler
 import android.os.HandlerThread
 
 class DbWorkerThread(threadName: String) : HandlerThread(threadName) {
-    private lateinit var  workerHandler: Handler
+    private var  workerHandler: Handler? = null
 
     override fun onLooperPrepared() {
         super.onLooperPrepared()
@@ -12,6 +12,7 @@ class DbWorkerThread(threadName: String) : HandlerThread(threadName) {
     }
 
     fun postTask(task: Runnable){
-        workerHandler.post(task)
+        if(workerHandler==null) workerHandler = Handler(looper)
+        workerHandler?.post(task)
     }
 }

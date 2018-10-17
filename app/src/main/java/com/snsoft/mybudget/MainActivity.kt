@@ -1,5 +1,6 @@
 package com.snsoft.mybudget
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.ArrayAdapter
@@ -61,8 +62,25 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.monthly_expense_details -> {
+                showMonthlyExpense()
+                true
+            }
+            R.id.expense_details -> {
+                showAllExpense()
+                true
+            }
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    fun showMonthlyExpense(){
+        val intent = Intent(this, MonthlyExpensesActivity::class.java)
+        startActivityForResult(intent, 0)
+    }
+
+    fun showAllExpense() {
+
     }
 }
