@@ -1,6 +1,6 @@
 package com.snsoft.mybudget
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import java.util.*
 
 @Entity(tableName = "expenseEntity")

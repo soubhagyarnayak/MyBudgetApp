@@ -1,7 +1,7 @@
 package com.snsoft.mybudget
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,12 +20,12 @@ class MonthlyExpensesActivity : AppCompatActivity() {
     private var expenseDatabase : ExpenseDatabase? = null
     private lateinit var dbWorkerThread: DbWorkerThread
     private var expenses: List<ExpenseEntry> = ArrayList()
-    private var gridViewAdapter : GridViewAdapter? = null
+    private var gridViewAdapter : ExpenseViewAdapter? = null
     private var updateUIHandler : Handler = object : Handler(Looper.getMainLooper()){
         override fun handleMessage(inputMessage: Message) {
             Logger.getLogger("handler").warning("in the handler")
             Logger.getLogger("handler").warning(expenses.count().toString())
-            gridViewAdapter = GridViewAdapter(applicationContext,expenses)
+            gridViewAdapter = ExpenseViewAdapter(applicationContext,expenses)
             monthlyExpenseTable.invalidate()
             for (expense in expenses){
                 var inflator = applicationContext!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
