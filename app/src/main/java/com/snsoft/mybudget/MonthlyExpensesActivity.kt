@@ -7,9 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_monthly_expenses.*
 import kotlinx.android.synthetic.main.monthly_expense_entry.view.*
 import java.util.*
@@ -43,16 +40,37 @@ class MonthlyExpensesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_monthly_expenses)
-
+        val startTime = findStartOfMonth()
+        val endTime = findEndOfMonth()
         dbWorkerThread = DbWorkerThread("dbWorkerThread")
         dbWorkerThread.start()
         expenseDatabase = ExpenseDatabase.getInstance(this)
-        val readTask = Runnable { var allEntries = expenseDatabase?.expenseDataDao()?.getAll()
+        val readTask = Runnable { var allEntries = expenseDatabase?.expenseDataDao()?.getAllForTimeRange(startTime,endTime)
             expenses = allEntries!!
             updateUIHandler.obtainMessage().sendToTarget()
         }
         dbWorkerThread.postTask(readTask)
 
+    }
+
+    fun findStartOfMonth() : Date{
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH,0)
+        calendar.set(Calendar.HOUR,0)
+        calendar.set(Calendar.MINUTE,0)
+        calendar.set(Calendar.SECOND,0)
+        calendar.set(Calendar.MILLISECOND,0)
+        return calendar.time
+    }
+
+    fun findEndOfMonth() : Date{
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR,23)
+        calendar.set(Calendar.MINUTE,59)
+        calendar.set(Calendar.SECOND,59)
+        calendar.set(Calendar.MILLISECOND,999)
+        return calendar.time
     }
 }
 
