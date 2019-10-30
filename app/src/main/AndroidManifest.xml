@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MonthlyExpensesActivity"></activity>
+        <activity android:name=".MonthlyExpensesChartActivity"></activity>
     </application>
 
 </manifest>

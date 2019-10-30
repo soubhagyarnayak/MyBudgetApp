@@ -63,6 +63,10 @@ class MainActivity : AppCompatActivity() {
                 showMonthlyExpense()
                 true
             }
+            R.id.monthly_expense_chart -> {
+                showMonthlyExpenseChart()
+                true
+            }
             R.id.expense_details -> {
                 showAllExpense()
                 true
@@ -74,6 +78,11 @@ class MainActivity : AppCompatActivity() {
 
     fun showMonthlyExpense(){
         val intent = Intent(this, MonthlyExpensesActivity::class.java)
+        startActivityForResult(intent, 0)
+    }
+
+    fun showMonthlyExpenseChart(){
+        val intent = Intent(this, MonthlyExpensesChartActivity::class.java)
         startActivityForResult(intent, 0)
     }
 

@@ -32,7 +32,6 @@ class MonthlyExpensesActivity : AppCompatActivity() {
                 monthlyExpenseTable.addView(expenseEntryView)
             }
         }
-
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
