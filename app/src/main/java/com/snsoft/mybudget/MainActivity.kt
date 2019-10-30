@@ -24,9 +24,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         dbWorkerThread = DbWorkerThread("dbWorkerThread")
         dbWorkerThread.start()
-        Logger.getLogger(MainActivity::class.java.name).warning("reached state1");
         expenseDatabase = ExpenseDatabase.getInstance(this)
-        Logger.getLogger(MainActivity::class.java.name).warning("reached state2");
         val categories = arrayOf("Extra","Food","Grocery","Travel","Bills","Medical")
         val categorySpinner = findViewById<Spinner>(R.id.categorySpinner)
         if (categorySpinner != null) {
@@ -41,11 +39,10 @@ class MainActivity : AppCompatActivity() {
                 val expenseEntry:ExpenseEntry = ExpenseEntry(null,descriptionText.text.toString(),amountText.text.toString().toDouble(),categories.indexOf(categorySpinner.selectedItem.toString()),Calendar.getInstance().time,Calendar.getInstance().time)
                 val task = Runnable { expenseDatabase?.expenseDataDao()?.insert(expenseEntry) }
                 dbWorkerThread.postTask(task)
-                val readTask = Runnable { var allEntries = expenseDatabase?.expenseDataDao()?.getAll()
-                    Logger.getLogger("background").info("Total entries"+allEntries?.count().toString())
+                val readTask = Runnable {
+                    var allEntries = expenseDatabase?.expenseDataDao()?.getAll()
                 }
                 dbWorkerThread.postTask(readTask)
-                Logger.getLogger(MainActivity::class.java.name).info(String.format("Amount:%s,Description:%s,Category:%s",amountText.text.toString(),descriptionText.text.toString(),categorySpinner.selectedItem.toString()))
 
             }
         }

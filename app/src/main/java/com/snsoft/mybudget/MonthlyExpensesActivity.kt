@@ -20,8 +20,6 @@ class MonthlyExpensesActivity : AppCompatActivity() {
     private var gridViewAdapter : ExpenseViewAdapter? = null
     private var updateUIHandler : Handler = object : Handler(Looper.getMainLooper()){
         override fun handleMessage(inputMessage: Message) {
-            Logger.getLogger("handler").warning("in the handler")
-            Logger.getLogger("handler").warning(expenses.count().toString())
             gridViewAdapter = ExpenseViewAdapter(applicationContext,expenses)
             monthlyExpenseTable.invalidate()
             for (expense in expenses){
@@ -33,7 +31,6 @@ class MonthlyExpensesActivity : AppCompatActivity() {
                 expenseEntryView.dateTimeCellText.text = expense.createTime.toString()
                 monthlyExpenseTable.addView(expenseEntryView)
             }
-            Logger.getLogger("handler").warning("in the handler2")
         }
 
     }
