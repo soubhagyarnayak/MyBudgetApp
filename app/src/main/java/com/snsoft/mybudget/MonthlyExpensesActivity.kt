@@ -36,8 +36,8 @@ class MonthlyExpensesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_monthly_expenses)
-        val startTime = findStartOfMonth()
-        val endTime = findEndOfMonth()
+        val startTime = DateUtil.findStartOfMonth()
+        val endTime = DateUtil.findEndOfMonth()
         dbWorkerThread = DbWorkerThread("dbWorkerThread")
         dbWorkerThread.start()
         expenseDatabase = ExpenseDatabase.getInstance(this)
@@ -47,26 +47,6 @@ class MonthlyExpensesActivity : AppCompatActivity() {
         }
         dbWorkerThread.postTask(readTask)
 
-    }
-
-    fun findStartOfMonth() : Date{
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH,0)
-        calendar.set(Calendar.HOUR,0)
-        calendar.set(Calendar.MINUTE,0)
-        calendar.set(Calendar.SECOND,0)
-        calendar.set(Calendar.MILLISECOND,0)
-        return calendar.time
-    }
-
-    fun findEndOfMonth() : Date{
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        calendar.set(Calendar.HOUR,23)
-        calendar.set(Calendar.MINUTE,59)
-        calendar.set(Calendar.SECOND,59)
-        calendar.set(Calendar.MILLISECOND,999)
-        return calendar.time
     }
 }
 

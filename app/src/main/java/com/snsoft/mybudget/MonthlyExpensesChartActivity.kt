@@ -2,14 +2,10 @@ package com.snsoft.mybudget
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.animation.Easing
 import android.view.WindowManager
-import android.widget.TextView
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.formatter.PercentFormatter
@@ -21,46 +17,54 @@ import com.github.mikephil.charting.utils.MPPointF
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import kotlin.collections.ArrayList
-import android.text.style.ForegroundColorSpan
-import android.graphics.Typeface
-import android.text.style.StyleSpan
-import android.text.style.RelativeSizeSpan
-import android.text.SpannableString
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import java.util.logging.Level
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import java.util.logging.Logger
 
 
-class MonthlyExpensesChartActivity : AppCompatActivity(),OnSeekBarChangeListener,OnChartValueSelectedListener  {
+class MonthlyExpensesChartActivity : AppCompatActivity(),OnChartValueSelectedListener  {
 
     private var chart: PieChart? = null
-    private var seekBarX: SeekBar? = null
-    private var seekBarY: SeekBar? = null
-    private var tvX: TextView? = null
-    private var tvY: TextView? = null
 
-    protected val parties = arrayOf("Party A", "Party B", "Party C", "Party D", "Party E", "Party F", "Party G", "Party H", "Party I", "Party J", "Party K", "Party L", "Party M", "Party N", "Party O", "Party P", "Party Q", "Party R", "Party S", "Party T", "Party U", "Party V", "Party W", "Party X", "Party Y", "Party Z")
+    private var expenseDatabase : ExpenseDatabase? = null
+    private lateinit var dbWorkerThread: DbWorkerThread
+    private var expenses: List<ExpenseEntry> = ArrayList()
 
+    private var updateUIHandler : Handler = object : Handler(Looper.getMainLooper()){
+        override fun handleMessage(inputMessage: Message) {
+            val categoryMap = mutableMapOf<String?,Double>();
+            for(expense in expenses){
+                val category = ExpenseCategory.getCategory(expense.category);
+                if(!categoryMap.containsKey(category)){
+                    categoryMap[category] = 0.0
+                }
+                categoryMap[category] = categoryMap[category]!! + (expense.amount);
+            }
+            setData(categoryMap)
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module")
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_monthly_expenses_chart)
-        title = "PieChartActivity"
+        title = "Monthly Expenses"
 
-        //
-        tvX = findViewById(R.id.tvXMax)
-        tvY = findViewById(R.id.tvYMax)
-
-        seekBarX = findViewById(R.id.seekBar1)
-        seekBarY = findViewById(R.id.seekBar2)
-
-        seekBarX?.setOnSeekBarChangeListener(this)
-        seekBarY?.setOnSeekBarChangeListener(this)
+        val startTime = DateUtil.findStartOfMonth()
+        val endTime = DateUtil.findEndOfMonth()
+        dbWorkerThread = DbWorkerThread("dbWorkerThread")
+        dbWorkerThread.start()
+        expenseDatabase = ExpenseDatabase.getInstance(this)
+        val readTask = Runnable { var allEntries = expenseDatabase?.expenseDataDao()?.getAllForTimeRange(startTime,endTime)
+            expenses = allEntries!!
+            updateUIHandler.obtainMessage().sendToTarget()
+        }
+        dbWorkerThread.postTask(readTask)
 
         chart = findViewById(R.id.chart1)
         chart?.setUsePercentValues(true)
@@ -70,7 +74,7 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnSeekBarChangeListener
         chart?.setDragDecelerationFrictionCoef(0.95f)
 
         //chart?.setCenterTextTypeface(tfLight)
-        chart?.setCenterText(generateCenterSpannableText())
+        chart?.setCenterText("Monthly Expenses")
 
         chart?.setDrawHoleEnabled(true)
         chart?.setHoleColor(Color.WHITE)
@@ -94,9 +98,6 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnSeekBarChangeListener
         // add a selection listener
         chart?.setOnChartValueSelectedListener(this)
 
-        seekBarX?.setProgress(4)
-        seekBarY?.setProgress(10)
-
         chart?.animateY(1400, Easing.EaseInOutQuad)
         // chart.spin(2000, 0, 360);
 
@@ -113,23 +114,19 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnSeekBarChangeListener
         chart?.setEntryLabelColor(Color.WHITE)
         //chart?.setEntryLabelTypeface(tfRegular)
         chart?.setEntryLabelTextSize(12f)
-        //
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module2")
+
     }
 
-    private fun setData(count: Int?, range: Int?) {
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module3")
+    private fun setData(categoryMap:Map<String?,Double> ) {
         val entries = ArrayList<PieEntry>()
 
         // NOTE: The order of the entries when being added to the entries array determines their position around the center of
         // the chart.
-        for (i in 0 until count!!) {
-            entries.add(PieEntry((Math.random() * range!! + range!! / 5).toFloat(),
-                    parties[i % parties.size],
-                    resources.getDrawable(R.drawable.star)))
+        for ((category, expense) in categoryMap) {
+            entries.add(PieEntry(expense.toFloat(),category))
         }
 
-        val dataSet = PieDataSet(entries, "Election Results")
+        val dataSet = PieDataSet(entries, "Monthly Expenses")
 
         dataSet.setDrawIcons(false)
 
@@ -172,34 +169,7 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnSeekBarChangeListener
         chart?.highlightValues(null)
 
         chart?.invalidate()
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module4")
     }
-
-    override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-
-        tvX?.setText(seekBarX?.getProgress().toString())
-        tvY?.setText(seekBarY?.getProgress().toString())
-
-        setData(seekBarX?.getProgress(), seekBarY?.getProgress())
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module5")
-    }
-
-    private fun generateCenterSpannableText(): SpannableString {
-        Logger.getLogger("chart").log(Level.WARNING,"inside the chart module6")
-        val s = SpannableString("MPAndroidChart\ndeveloped by Philipp Jahoda")
-        s.setSpan(RelativeSizeSpan(1.7f), 0, 14, 0)
-        s.setSpan(StyleSpan(Typeface.NORMAL), 14, s.length - 15, 0)
-        s.setSpan(ForegroundColorSpan(Color.GRAY), 14, s.length - 15, 0)
-        s.setSpan(RelativeSizeSpan(.8f), 14, s.length - 15, 0)
-        s.setSpan(StyleSpan(Typeface.ITALIC), s.length - 14, s.length, 0)
-        s.setSpan(ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length - 14, s.length, 0)
-        return s
-
-    }
-
-    override fun onStartTrackingTouch(seekBar: SeekBar) {}
-
-    override fun onStopTrackingTouch(seekBar: SeekBar) {}
 
     override fun onValueSelected(e:Entry, h:Highlight) {}
 
