@@ -1,5 +1,6 @@
 package com.snsoft.mybudget
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +35,7 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnChartValueSelectedLis
     private var expenseDatabase : ExpenseDatabase? = null
     private lateinit var dbWorkerThread: DbWorkerThread
     private var expenses: List<ExpenseEntry> = ArrayList()
+    private var categoryExpensesMap: MutableMap<String?, MutableList<ExpenseEntry>> = mutableMapOf()
 
     private var updateUIHandler : Handler = object : Handler(Looper.getMainLooper()){
         override fun handleMessage(inputMessage: Message) {
@@ -42,8 +44,10 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnChartValueSelectedLis
                 val category = ExpenseCategory.getCategory(expense.category);
                 if(!categoryMap.containsKey(category)){
                     categoryMap[category] = 0.0
+                    categoryExpensesMap[category] = arrayListOf<ExpenseEntry>()
                 }
                 categoryMap[category] = categoryMap[category]!! + (expense.amount);
+                categoryExpensesMap[category]?.add(expense)
             }
             setData(categoryMap)
         }
@@ -88,14 +92,10 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnChartValueSelectedLis
         chart?.setDrawCenterText(true)
 
         chart?.setRotationAngle(0.0f)
-        // enable rotation of the chart by touch
+
         chart?.setRotationEnabled(true)
         chart?.setHighlightPerTapEnabled(true)
 
-        // chart.setUnit(" €");
-        // chart.setDrawUnitsInChart(true);
-
-        // add a selection listener
         chart?.setOnChartValueSelectedListener(this)
 
         chart?.animateY(1400, Easing.EaseInOutQuad)
@@ -171,7 +171,14 @@ class MonthlyExpensesChartActivity : AppCompatActivity(),OnChartValueSelectedLis
         chart?.invalidate()
     }
 
-    override fun onValueSelected(e:Entry, h:Highlight) {}
+    override fun onValueSelected(e:Entry, h:Highlight) {
+        Logger.getLogger("chart").info("OnValueSelected"+e.toString()+h.toString())
+        val pieEntry = e as PieEntry
+        val intent = Intent(this, MonthlyExpensesActivity::class.java)
+        intent.putExtra("FETCH_MONTHLY_DATA", false)
+        intent.putParcelableArrayListExtra("EXPENSE_ENTRIES", categoryExpensesMap[pieEntry.label] as ArrayList<ExpenseEntry>)
+        startActivityForResult(intent, 0)
+    }
 
     override fun onNothingSelected() {}
 }

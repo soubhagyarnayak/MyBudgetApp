@@ -20,22 +20,24 @@ class MonthlyExpensesActivity : AppCompatActivity() {
     private var gridViewAdapter : ExpenseViewAdapter? = null
     private var updateUIHandler : Handler = object : Handler(Looper.getMainLooper()){
         override fun handleMessage(inputMessage: Message) {
-            gridViewAdapter = ExpenseViewAdapter(applicationContext,expenses)
-            monthlyExpenseTable.invalidate()
-            for (expense in expenses){
-                var inflator = applicationContext!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-                var expenseEntryView = inflator.inflate(R.layout.monthly_expense_entry, null)
-                expenseEntryView.amountCellText.text = expense.amount.toString()
-                expenseEntryView.categoryCellText.text = expense.category.toString()
-                expenseEntryView.descriptionCellText.text = expense.description.toString()
-                expenseEntryView.dateTimeCellText.text = expense.createTime.toString()
-                monthlyExpenseTable.addView(expenseEntryView)
-            }
+            refreshGrid()
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_monthly_expenses)
+        val fetchMonthlyData = getIntent().getBooleanExtra("FETCH_MONTHLY_DATA", false)
+        if(fetchMonthlyData) {
+            fetchMonthlyData()
+        }
+        else{
+            expenses = (getIntent().getSerializableExtra("EXPENSE_ENTRIES")) as List<ExpenseEntry>
+            refreshGrid()
+        }
+
+    }
+
+    private fun fetchMonthlyData(){
         val startTime = DateUtil.findStartOfMonth()
         val endTime = DateUtil.findEndOfMonth()
         dbWorkerThread = DbWorkerThread("dbWorkerThread")
@@ -46,7 +48,20 @@ class MonthlyExpensesActivity : AppCompatActivity() {
             updateUIHandler.obtainMessage().sendToTarget()
         }
         dbWorkerThread.postTask(readTask)
+    }
 
+    private fun refreshGrid(){
+        gridViewAdapter = ExpenseViewAdapter(applicationContext,expenses)
+        monthlyExpenseTable.invalidate()
+        for (expense in expenses){
+            var inflator = applicationContext!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            var expenseEntryView = inflator.inflate(R.layout.monthly_expense_entry, null)
+            expenseEntryView.amountCellText.text = expense.amount.toString()
+            expenseEntryView.categoryCellText.text = expense.category.toString()
+            expenseEntryView.descriptionCellText.text = expense.description.toString()
+            expenseEntryView.dateTimeCellText.text = expense.createTime.toString()
+            monthlyExpenseTable.addView(expenseEntryView)
+        }
     }
 }
 

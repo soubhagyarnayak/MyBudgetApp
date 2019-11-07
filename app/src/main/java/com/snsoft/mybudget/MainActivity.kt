@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
 
     fun showMonthlyExpense(){
         val intent = Intent(this, MonthlyExpensesActivity::class.java)
+        intent.putExtra("FETCH_MONTHLY_DATA", true)
         startActivityForResult(intent, 0)
     }
 
