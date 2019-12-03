@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
                 dbWorkerThread.postTask(task)
                 val readTask = Runnable {
                     var allEntries = expenseDatabase?.expenseDataDao()?.getAll()
+                    BudgetServiceProxy().postExpense(expenseEntry)
                 }
                 dbWorkerThread.postTask(readTask)
 
