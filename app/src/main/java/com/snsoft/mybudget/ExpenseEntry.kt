@@ -7,7 +7,7 @@ import java.io.Serializable
 import java.util.*
 
 @Entity(tableName = "expenseEntity")
-data class ExpenseEntry(@PrimaryKey(autoGenerate = true) var id: Long?,
+data class ExpenseEntry(@PrimaryKey() var id: UUID,
                         @ColumnInfo(name = "description") var description: String,
                         @ColumnInfo(name = "amount") var amount: Double,
                         @ColumnInfo(name = "category") var category: Int,
@@ -15,7 +15,7 @@ data class ExpenseEntry(@PrimaryKey(autoGenerate = true) var id: Long?,
                         @ColumnInfo(name= "updateTime") var updateTime: Date
 ): Serializable, Parcelable {
     constructor(parcel: Parcel) : this(
-            parcel.readValue(Long::class.java.classLoader) as? Long,
+            parcel.readValue(UUID::class.java.classLoader) as UUID,
             parcel.readString(),
             parcel.readDouble(),
             parcel.readInt(),
@@ -23,7 +23,7 @@ data class ExpenseEntry(@PrimaryKey(autoGenerate = true) var id: Long?,
             Date(parcel.readLong())) {
     }
 
-    constructor(): this(null,"",0.0,0,Calendar.getInstance().time,Calendar.getInstance().time)
+    constructor(): this(UUID.randomUUID(),"",0.0,0,Calendar.getInstance().time,Calendar.getInstance().time)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeValue(id)

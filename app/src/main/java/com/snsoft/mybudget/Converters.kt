@@ -13,4 +13,14 @@ class Converters {
     fun dateToTimestamp(date: Date?): Long? {
         return if (date == null) null else date.getTime().toLong()
     }
+
+    @TypeConverter
+    fun fromUUID(value: UUID): String{
+        return value.toString()
+    }
+
+    @TypeConverter
+    fun stringToUUID(uuid:String): UUID{
+        return UUID.fromString(uuid)
+    }
 }

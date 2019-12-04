@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         val addButton = findViewById<Button>(R.id.addButton);
         if(addButton != null){
             addButton.setOnClickListener{
-                val expenseEntry:ExpenseEntry = ExpenseEntry(null,descriptionText.text.toString(),amountText.text.toString().toDouble(),categories.indexOf(categorySpinner.selectedItem.toString()),Calendar.getInstance().time,Calendar.getInstance().time)
+                val expenseEntry:ExpenseEntry = ExpenseEntry(UUID.randomUUID(),descriptionText.text.toString(),amountText.text.toString().toDouble(),categories.indexOf(categorySpinner.selectedItem.toString()),Calendar.getInstance().time,Calendar.getInstance().time)
                 val task = Runnable { expenseDatabase?.expenseDataDao()?.insert(expenseEntry) }
                 dbWorkerThread.postTask(task)
                 val readTask = Runnable {
